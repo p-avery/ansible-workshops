@@ -1,0 +1,251 @@
+---
+- debug:
+    var: ec2_info
+
+- name: Create GitLab instance
+  ec2:
+    assign_public_ip: true
+    key_name: "{{ ec2_name_prefix }}-key"
+    group: "{{ ec2_security_group }}"
+    instance_type: "{{ ec2_info['gitlab']['size'] }}"
+    image: "{{ gitlab_ami.image_id }}"
+    region: "{{ ec2_region }}"
+    exact_count: 1
+    count_tag:
+      Workshop_gitlab: "{{ ec2_name_prefix }}-gitlab"
+    instance_tags:
+      Workshop_gitlab: "{{ ec2_name_prefix }}-gitlab"
+      Name: "{{ ec2_name_prefix }}-gitlab"
+      App: AnsibleWorkshop
+      Workshop: "{{ ec2_name_prefix }}"
+      Workshop_type: "{{ workshop_type }}"
+      AWS_USERNAME: "{{ aws_user }}"
+      Info: "Username that provisioned this-> {{ aws_user }}"
+      Linklight: "This was provisioned through the linklight provisioner"
+      Students: "{{ student_total }}"
+      short_name: 'gitlab'
+      long_name: "gitlab.{{ ec2_name_prefix }}.{{ workshop_dns_zone | default('') }}"
+      username: "{{ ec2_info['gitlab']['username'] }}"
+    wait: "{{ ec2_wait }}"
+    vpc_subnet_id: "{{ ec2_vpc_subnet_id }}"
+    user_data: "{{ lookup('template', 'gitlab_userdata.j2') }}"
+  register: gitlab_output
+
+- name: Create EC2 instances for devnode
+  ec2:
+    assign_public_ip: true
+    key_name: "{{ ec2_name_prefix }}-key"
+    group: "{{ ec2_security_group }}"
+    instance_type: "{{ ec2_info[rhel].size }}"
+    image: "{{ node_ami.image_id }}"
+    region: "{{ ec2_region }}"
+    exact_count: "{{ student_total }}"
+    count_tag:
+      Workshop_node1: "{{ ec2_name_prefix }}-devnode"
+    instance_tags:
+      Workshop_node1: "{{ ec2_name_prefix }}-devnode"
+      Workshop: "{{ ec2_name_prefix }}"
+      Workshop_type: "{{ workshop_type }}"
+      AWS_USERNAME: "{{ aws_user }}"
+      Info: "AWS_USERNAME that provisioned this-> {{ aws_user }}"
+      Linklight: "This was provisioned through the linklight provisioner"
+      Students: "{{ student_total }}"
+      short_name: "devnode"
+      username: "{{ ec2_info[rhel].username }}"
+    wait: "{{ ec2_wait }}"
+    vpc_subnet_id: "{{ ec2_vpc_subnet_id }}"
+    volumes:
+      - device_name: /dev/sda1
+        volume_type: gp2
+        volume_size: "{{ ec2_info[rhel].disk_space }}"
+        delete_on_termination: true
+  register: devnode_output
+
+- name: Ensure tags are present for devnode
+  ec2_tag:
+    region: "{{ ec2_region }}"
+    resource: "{{ item.1.id }}"
+    state: present
+    tags:
+      Name: "{{ ec2_name_prefix }}-student{{ item.0 + 1 }}-devnode"
+      Index: "{{ item[0] }}"
+      Student: "student{{ item.0 + 1 }}"
+      launch_time: "{{ item.1.launch_time }}"
+  with_indexed_items:
+    - "{{ devnode_output.instances }}"
+  when: devnode_output.instance_ids is not none
+
+- name: Create EC2 instances for qanode
+  ec2:
+    assign_public_ip: true
+    key_name: "{{ ec2_name_prefix }}-key"
+    group: "{{ ec2_security_group }}"
+    instance_type: "{{ ec2_info[rhel].size }}"
+    image: "{{ node_ami.image_id }}"
+    region: "{{ ec2_region }}"
+    exact_count: "{{ student_total }}"
+    count_tag:
+      Workshop_node2: "{{ ec2_name_prefix }}-qanode"
+    instance_tags:
+      Workshop_node2: "{{ ec2_name_prefix }}-qanode"
+      Workshop: "{{ ec2_name_prefix }}"
+      Workshop_type: "{{ workshop_type }}"
+      AWS_USERNAME: "{{ aws_user }}"
+      Info: "AWS_USERNAME that provisioned this-> {{ aws_user }}"
+      Linklight: "This was provisioned through the linklight provisioner"
+      Students: "{{ student_total }}"
+      short_name: "qanode"
+      username: "{{ ec2_info[rhel].username }}"
+    wait: "{{ ec2_wait }}"
+    vpc_subnet_id: "{{ ec2_vpc_subnet_id }}"
+    volumes:
+      - device_name: /dev/sda1
+        volume_type: gp2
+        volume_size: "{{ ec2_info[rhel].disk_space }}"
+        delete_on_termination: true
+  register: qanode_output
+
+- name: Ensure tags are present for qanode
+  ec2_tag:
+    region: "{{ ec2_region }}"
+    resource: "{{ item.1.id }}"
+    state: present
+    tags:
+      Name: "{{ ec2_name_prefix }}-student{{ item.0 + 1 }}-qanode"
+      Index: "{{ item[0] }}"
+      Student: "student{{ item.0 + 1 }}"
+      launch_time: "{{ item.1.launch_time }}"
+  with_indexed_items:
+    - "{{ qanode_output.instances }}"
+  when: qanode_output.instance_ids is not none
+
+- name: Create EC2 instances for prodnode1
+  ec2:
+    assign_public_ip: true
+    key_name: "{{ ec2_name_prefix }}-key"
+    group: "{{ ec2_security_group }}"
+    instance_type: "{{ ec2_info[rhel].size }}"
+    image: "{{ node_ami.image_id }}"
+    region: "{{ ec2_region }}"
+    exact_count: "{{ student_total }}"
+    count_tag:
+      Workshop_node1: "{{ ec2_name_prefix }}-prodnode1"
+    instance_tags:
+      Workshop_node1: "{{ ec2_name_prefix }}-prodnode1"
+      Workshop: "{{ ec2_name_prefix }}"
+      Workshop_type: "{{ workshop_type }}"
+      AWS_USERNAME: "{{ aws_user }}"
+      Info: "AWS_USERNAME that provisioned this-> {{ aws_user }}"
+      Linklight: "This was provisioned through the linklight provisioner"
+      Students: "{{ student_total }}"
+      short_name: "prodnode1"
+      username: "{{ ec2_info[rhel].username }}"
+    wait: "{{ ec2_wait }}"
+    vpc_subnet_id: "{{ ec2_vpc_subnet_id }}"
+    volumes:
+      - device_name: /dev/sda1
+        volume_type: gp2
+        volume_size: "{{ ec2_info[rhel].disk_space }}"
+        delete_on_termination: true
+  register: prodnode1_output
+
+- name: Ensure tags are present for prodnode1
+  ec2_tag:
+    region: "{{ ec2_region }}"
+    resource: "{{ item.1.id }}"
+    state: present
+    tags:
+      Name: "{{ ec2_name_prefix }}-student{{ item.0 + 1 }}-prodnode1"
+      Index: "{{ item[0] }}"
+      Student: "student{{ item.0 + 1 }}"
+      launch_time: "{{ item.1.launch_time }}"
+  with_indexed_items:
+    - "{{ prodnode1_output.instances }}"
+  when: prodnode1_output.instance_ids is not none
+
+- name: Create EC2 instances for prodnode2
+  ec2:
+    assign_public_ip: true
+    key_name: "{{ ec2_name_prefix }}-key"
+    group: "{{ ec2_security_group }}"
+    instance_type: "{{ ec2_info[rhel].size }}"
+    image: "{{ node_ami.image_id }}"
+    region: "{{ ec2_region }}"
+    exact_count: "{{ student_total }}"
+    count_tag:
+      Workshop_node2: "{{ ec2_name_prefix }}-prodnode2"
+    instance_tags:
+      Workshop_node2: "{{ ec2_name_prefix }}-prodnode2"
+      Workshop: "{{ ec2_name_prefix }}"
+      Workshop_type: "{{ workshop_type }}"
+      AWS_USERNAME: "{{ aws_user }}"
+      Info: "AWS_USERNAME that provisioned this-> {{ aws_user }}"
+      Linklight: "This was provisioned through the linklight provisioner"
+      Students: "{{ student_total }}"
+      short_name: "prodnode2"
+      username: "{{ ec2_info[rhel].username }}"
+    wait: "{{ ec2_wait }}"
+    vpc_subnet_id: "{{ ec2_vpc_subnet_id }}"
+    volumes:
+      - device_name: /dev/sda1
+        volume_type: gp2
+        volume_size: "{{ ec2_info[rhel].disk_space }}"
+        delete_on_termination: true
+  register: prodnode2_output
+
+- name: Ensure tags are present for prodnode2
+  ec2_tag:
+    region: "{{ ec2_region }}"
+    resource: "{{ item.1.id }}"
+    state: present
+    tags:
+      Name: "{{ ec2_name_prefix }}-student{{ item.0 + 1 }}-prodnode2"
+      Index: "{{ item[0] }}"
+      Student: "student{{ item.0 + 1 }}"
+      launch_time: "{{ item.1.launch_time }}"
+  with_indexed_items:
+    - "{{ prodnode2_output.instances }}"
+  when: prodnode2_output.instance_ids is not none
+
+- name: Create Jenkins instance
+  ec2:
+    assign_public_ip: true
+    key_name: "{{ ec2_name_prefix }}-key"
+    group: "{{ ec2_security_group }}"
+    instance_type: "{{ ec2_info['jenkins']['size'] }}"
+    image: "{{ jenkins_ami.image_id }}"
+    region: "{{ ec2_region }}"
+    exact_count: 1
+    count_tag:
+      Workshop_jenkins: "{{ ec2_name_prefix }}-jenkins"
+    instance_tags:
+      Workshop_jenkins: "{{ ec2_name_prefix }}-jenkins"
+      Name: "{{ ec2_name_prefix }}-jenkins"
+      App: AnsibleWorkshop
+      Workshop: "{{ ec2_name_prefix }}"
+      Workshop_type: "{{ workshop_type }}"
+      AWS_USERNAME: "{{ aws_user }}"
+      Info: "Username that provisioned this-> {{ aws_user }}"
+      Linklight: "This was provisioned through the linklight provisioner"
+      Students: "{{ student_total }}"
+      short_name: 'jenkins'
+      long_name: "jenkins.{{ ec2_name_prefix }}.{{ workshop_dns_zone | default('') }}"
+      username: "{{ ec2_info['jenkins']['username'] }}"
+    wait: "{{ ec2_wait }}"
+    vpc_subnet_id: "{{ ec2_vpc_subnet_id }}"
+    user_data: "{{ lookup('template', 'jenkins_userdata.j2') }}"
+  register: jenkins_output
+
+- name: Ensure tags are present for jenkins
+  ec2_tag:
+    region: "{{ ec2_region }}"
+    resource: "{{ item.1.id }}"
+    state: present
+    tags:
+      Name: "{{ ec2_name_prefix }}-student{{ item.0 + 1 }}-jenkins"
+      Index: "{{ item[0] }}"
+      Student: "student{{ item.0 + 1 }}"
+      launch_time: "{{ item.1.launch_time }}"
+  with_indexed_items:
+    - "{{ jenkins_output.instances }}"
+  when: jenkins_output.instance_ids is not none
