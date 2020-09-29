@@ -73,14 +73,14 @@ some web server specific configurations.
 - name: This is a play within a playbook
   hosts: windows
   vars:
-  iis_sites:
-  - name: 'Ansible Playbook Test'
-    port: '8080'
-    path: 'C:\sites\playbooktest'
-  - name: 'Ansible Playbook Test 2'
-    port: '8081'
-    path: 'C:\sites\playbooktest2'
-  iis_test_message: "Hello World!  My test IIS Server"
+    iis_sites:
+    - name: 'Ansible Playbook Test'
+      port: '8080'
+      path: 'C:\sites\playbooktest'
+    - name: 'Ansible Playbook Test 2'
+      port: '8081'
+      path: 'C:\sites\playbooktest2'
+    iis_test_message: "Hello World!  My test IIS Server"
 ```
 
 Step 4:
@@ -101,7 +101,7 @@ Add a new task called **install IIS**. After writing the playbook, click
     win_file:
       path: "{{ item.path }}"
       state: directory
-      with_items: "{{ iis_sites }}"
+    with_items: "{{ iis_sites }}"
 
   - name: Create IIS site
     win_iis_website:
@@ -109,7 +109,7 @@ Add a new task called **install IIS**. After writing the playbook, click
       state: started
       port: "{{ item.port }}"
       physical_path: "{{ item.path }}"
-      with_items: "{{ iis_sites }}"
+    with_items: "{{ iis_sites }}"
     notify: restart iis service
 ```
 <!-- {% endraw %} -->
@@ -166,8 +166,8 @@ for creating your template. Enter the following details:
 ```html
 <html>
 <body>
-<p align=center><img src='http://docs.ansible.com/images/logo.png' align=center>
-<h1 align=center>{{ ansible_hostname }} --- {{ iis_test_message }}
+  <p align=center><img src='http://docs.ansible.com/images/logo.png' align=center>
+  <h1 align=center>{{ ansible_hostname }} --- {{ iis_test_message }}
 </body>
 </html>
 ```
@@ -303,14 +303,14 @@ shows line counts and spacing.
 - name: This is a play within a playbook
   hosts: windows
   vars:
-  iis_sites:
-  - name: 'Ansible Playbook Test'
-    port: '8080'
-    path: 'C:\sites\playbooktest'
-  - name: 'Ansible Playbook Test 2'
-    port: '8081'
-    path: 'C:\sites\playbooktest2'
-  iis_test_message: "Hello World!  My test IIS Server"
+    iis_sites:
+    - name: 'Ansible Playbook Test'
+      port: '8080'
+      path: 'C:\sites\playbooktest'
+    - name: 'Ansible Playbook Test 2'
+      port: '8081'
+      path: 'C:\sites\playbooktest2'
+    iis_test_message: "Hello World!  My test IIS Server"
   tasks:
   - name: Install IIS
     win_feature:
@@ -321,7 +321,7 @@ shows line counts and spacing.
     win_file:
       path: "{{ item.path }}"
       state: directory
-      with_items: "{{ iis_sites }}"
+    with_items: "{{ iis_sites }}"
 
   - name: Create IIS site
     win_iis_website:
@@ -329,8 +329,8 @@ shows line counts and spacing.
       state: started
       port: "{{ item.port }}"
       physical_path: "{{ item.path }}"
-      with_items: "{{ iis_sites }}"
-      notify: restart iis service
+    with_items: "{{ iis_sites }}"
+    notify: restart iis service
 
   - name: Open port for site on the firewall
     win_firewall_rule:
