@@ -47,8 +47,8 @@ creating snapshots, or disabling monitoring.
 <!-- {% raw %} -->
 ```yaml
 ---
-- hosts: windows
-  name: This is my Windows patching playbook
+- name: This is my Windows patching playbook
+  hosts: windows
   tasks:
     - name: Install Windows Updates
       win_updates:
