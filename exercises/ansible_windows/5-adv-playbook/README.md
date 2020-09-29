@@ -110,7 +110,7 @@ Add a new task called **install IIS**. After writing the playbook, click
       port: "{{ item.port }}"
       physical_path: "{{ item.path }}"
       with_items: "{{ iis_sites }}"
-      notify: restart iis service
+    notify: restart iis service
 ```
 <!-- {% endraw %} -->
 
