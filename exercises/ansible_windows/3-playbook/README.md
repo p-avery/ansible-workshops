@@ -73,9 +73,9 @@ Now that you are editing `install_iis.yml`, let’s begin by defining the
 play and then understanding what each line accomplishes
 
 ```yaml
-    ---
-    - name: install the iis web service
-      hosts: windows
+---
+- name: install the iis web service
+  hosts: windows
 ```
 
 - `---` Defines the beginning of YAML
@@ -99,25 +99,25 @@ of this exercise.
 
 <!-- {% raw %} -->
 ```yaml
-      tasks:
-       - name: install iis
-         win_feature:
-           name: Web-Server
-           state: present
+  tasks:
+  - name: install iis
+    win_feature:
+      name: Web-Server
+      state: present
 
-       - name: start iis service
-         win_service:
-           name: W3Svc
-           state: started
+  - name: start iis service
+    win_service:
+      name: W3Svc
+      state: started
 
-       - name: Create website index.html
-         win_copy:
-           content: "{{ iis_test_message }}"
-           dest: C:\Inetpub\wwwroot\index.html
+  - name: Create website index.html
+    win_copy:
+      content: "{{ iis_test_message }}"
+      dest: C:\Inetpub\wwwroot\index.html
 
-       - name: Show website address
-         debug:
-           msg: "http://{{ ansible_host }}"
+  - name: Show website address
+    debug:
+      msg: "http://{{ ansible_host }}"
 ```
 <!-- {% endraw %} -->
 
@@ -232,28 +232,28 @@ You are ready to automate!
 
 <!-- {% raw %} -->
 ```yaml
-    ---
-    - name: install the iis web service
-      hosts: windows
+---
+- name: install the iis web service
+  hosts: windows
 
-      tasks:
-        - name: install iis
-          win_feature:
-            name: Web-Server
-            state: present
+  tasks:
+    - name: install iis
+      win_feature:
+        name: Web-Server
+        state: present
 
-        - name: start iis service
-          win_service:
-            name: W3Svc
-            state: started
+    - name: start iis service
+      win_service:
+        name: W3Svc
+        state: started
 
-        - name: Create website index.html
-          win_copy:
-            content: "{{ iis_test_message }}"
-            dest: C:\Inetpub\wwwroot\index.html
+    - name: Create website index.html
+      win_copy:
+        content: "{{ iis_test_message }}"
+        dest: C:\Inetpub\wwwroot\index.html
 
-        - name: Show website address
-          debug:
-            msg: http://{{ ansible_host }}
+    - name: Show website address
+      debug:
+        msg: "http://{{ ansible_host }}"
 ```
 <!-- {% endraw %} -->
