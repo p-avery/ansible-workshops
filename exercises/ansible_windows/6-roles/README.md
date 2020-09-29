@@ -84,9 +84,9 @@ below:
 
 ```yaml
 ---
-- hosts: windows
-  name: This is my role-based playbook
-
+- name: This is my role-based playbook
+  hosts: windows
+  
   roles:
   - iis_simple
 ```
