@@ -93,18 +93,18 @@ Add a new task called **install IIS**. After writing the playbook, click
 ```yaml
   tasks:
   - name: Install IIS
-      win_feature:
+    win_feature:
       name: Web-Server
       state: present
 
   - name: Create site directory structure
-      win_file:
+    win_file:
       path: "{{ item.path }}"
       state: directory
       with_items: "{{ iis_sites }}"
 
   - name: Create IIS site
-      win_iis_website:
+    win_iis_website:
       name: "{{ item.name }}"
       state: started
       port: "{{ item.port }}"
@@ -169,7 +169,7 @@ for creating your template. Enter the following details:
 <p align=center><img src='http://docs.ansible.com/images/logo.png' align=center>
 <h1 align=center>{{ ansible_hostname }} --- {{ iis_test_message }}
 </body>
-   </html>
+</html>
 ```
 <!-- {% endraw %} -->
 
@@ -184,29 +184,29 @@ not escape the forward slash.
 
 <!-- {% raw %} -->
 ```yaml
-        - name: Open port for site on the firewall
-          win_firewall_rule:
-            name: "iisport{{ item.port }}"
-            enable: yes
-            state: present
-            localport: "{{ item.port }}"
-            action: Allow
-            direction: In
-            protocol: Tcp
-          with_items: "{{ iis_sites }}"
+  - name: Open port for site on the firewall
+    win_firewall_rule:
+      name: "iisport{{ item.port }}"
+      enable: yes
+      state: present
+      localport: "{{ item.port }}"
+      action: Allow
+      direction: In
+      protocol: Tcp
+    with_items: "{{ iis_sites }}"
 
-        - name: Template simple web site to iis_site_path as index.html
-          win_template:
-            src: 'index.html.j2'
-            dest: '{{ item.path }}\index.html'
-          with_items: "{{ iis_sites }}"
+  - name: Template simple web site to iis_site_path as index.html
+    win_template:
+      src: 'index.html.j2'
+      dest: '{{ item.path }}\index.html'
+    with_items: "{{ iis_sites }}"
 
-        - name: Show website addresses
-          debug:
-            msg: "{{ item }}"
-          loop:
-            - http://{{ ansible_host }}:8080
-            - http://{{ ansible_host }}:8081
+  - name: Show website addresses
+    debug:
+      msg: "{{ item }}"
+    loop:
+      - http://{{ ansible_host }}:8080
+      - http://{{ ansible_host }}:8081
 ```
 <!-- {% endraw %} -->
 
@@ -246,12 +246,12 @@ Step 1:
 Define a handler.
 
 ```yaml
-      handlers:
-        - name: restart iis service
-          win_service:
-            name: W3Svc
-            state: restarted
-            start_mode: auto
+  handlers:
+  - name: restart iis service
+    win_service:
+      name: W3Svc
+      state: restarted
+      start_mode: auto
 ```
 
 > **Note**
@@ -299,70 +299,69 @@ shows line counts and spacing.
 
 <!-- {% raw %} -->
 ```yaml
-    ---
-    - hosts: windows
-      name: This is a play within a playbook
-      vars:
-        iis_sites:
-          - name: 'Ansible Playbook Test'
-            port: '8080'
-            path: 'C:\sites\playbooktest'
-          - name: 'Ansible Playbook Test 2'
-            port: '8081'
-            path: 'C:\sites\playbooktest2'
-        iis_test_message: "Hello World!  My test IIS Server"
+---
+- name: This is a play within a playbook
+  hosts: windows
+  vars:
+  iis_sites:
+  - name: 'Ansible Playbook Test'
+    port: '8080'
+    path: 'C:\sites\playbooktest'
+  - name: 'Ansible Playbook Test 2'
+    port: '8081'
+    path: 'C:\sites\playbooktest2'
+  iis_test_message: "Hello World!  My test IIS Server"
+  tasks:
+  - name: Install IIS
+    win_feature:
+      name: Web-Server
+      state: present
 
-      tasks:
-        - name: Install IIS
-          win_feature:
-            name: Web-Server
-            state: present
+  - name: Create site directory structure
+    win_file:
+      path: "{{ item.path }}"
+      state: directory
+      with_items: "{{ iis_sites }}"
 
-        - name: Create site directory structure
-          win_file:
-            path: "{{ item.path }}"
-            state: directory
-          with_items: "{{ iis_sites }}"
+  - name: Create IIS site
+    win_iis_website:
+      name: "{{ item.name }}"
+      state: started
+      port: "{{ item.port }}"
+      physical_path: "{{ item.path }}"
+      with_items: "{{ iis_sites }}"
+      notify: restart iis service
 
-        - name: Create IIS site
-          win_iis_website:
-            name: "{{ item.name }}"
-            state: started
-            port: "{{ item.port }}"
-            physical_path: "{{ item.path }}"
-          with_items: "{{ iis_sites }}"
-          notify: restart iis service
+  - name: Open port for site on the firewall
+    win_firewall_rule:
+      name: "iisport{{ item.port }}"
+      enable: yes
+      state: present
+      localport: "{{ item.port }}"
+      action: Allow
+      direction: In
+      protocol: Tcp
+    with_items: "{{ iis_sites }}"
 
-        - name: Open port for site on the firewall
-          win_firewall_rule:
-            name: "iisport{{ item.port }}"
-            enable: yes
-            state: present
-            localport: "{{ item.port }}"
-            action: Allow
-            direction: In
-            protocol: Tcp
-          with_items: "{{ iis_sites }}"
+  - name: Template simple web site to iis_site_path as index.html
+    win_template:
+      src: 'index.html.j2'
+      dest: '{{ item.path }}\index.html'
+    with_items: "{{ iis_sites }}"
 
-        - name: Template simple web site to iis_site_path as index.html
-          win_template:
-            src: 'index.html.j2'
-            dest: '{{ item.path }}\index.html'
-          with_items: "{{ iis_sites }}"
+  - name: Show website addresses
+    debug:
+      msg: "{{ item }}"
+    loop:
+      - http://{{ ansible_host }}:8080
+      - http://{{ ansible_host }}:8081
 
-        - name: Show website addresses
-          debug:
-            msg: "{{ item }}"
-          loop:
-            - http://{{ ansible_host }}:8080
-            - http://{{ ansible_host }}:8081
-
-      handlers:
-        - name: restart iis service
-          win_service:
-            name: W3Svc
-            state: restarted
-            start_mode: auto
+  handlers:
+  - name: restart iis service
+    win_service:
+      name: W3Svc
+      state: restarted
+      start_mode: auto
 ```
 <!-- {% endraw %} -->
 
