@@ -69,18 +69,18 @@ addtional packages your playbook will install on your web servers, plus
 some web server specific configurations.
 
 ```yaml
-    ---
-    - hosts: windows
-      name: This is a play within a playbook
-      vars:
-        iis_sites:
-          - name: 'Ansible Playbook Test'
-            port: '8080'
-            path: 'C:\sites\playbooktest'
-          - name: 'Ansible Playbook Test 2'
-            port: '8081'
-            path: 'C:\sites\playbooktest2'
-        iis_test_message: "Hello World!  My test IIS Server"
+---
+- name: This is a play within a playbook
+  hosts: windows
+  vars:
+  iis_sites:
+  - name: 'Ansible Playbook Test'
+    port: '8080'
+    path: 'C:\sites\playbooktest'
+  - name: 'Ansible Playbook Test 2'
+    port: '8081'
+    path: 'C:\sites\playbooktest2'
+  iis_test_message: "Hello World!  My test IIS Server"
 ```
 
 Step 4:
@@ -91,26 +91,26 @@ Add a new task called **install IIS**. After writing the playbook, click
 
 <!-- {% raw %} -->
 ```yaml
-      tasks:
-        - name: Install IIS
-          win_feature:
-            name: Web-Server
-            state: present
+  tasks:
+  - name: Install IIS
+      win_feature:
+      name: Web-Server
+      state: present
 
-        - name: Create site directory structure
-          win_file:
-            path: "{{ item.path }}"
-            state: directory
-          with_items: "{{ iis_sites }}"
+  - name: Create site directory structure
+      win_file:
+      path: "{{ item.path }}"
+      state: directory
+      with_items: "{{ iis_sites }}"
 
-        - name: Create IIS site
-          win_iis_website:
-            name: "{{ item.name }}"
-            state: started
-            port: "{{ item.port }}"
-            physical_path: "{{ item.path }}"
-          with_items: "{{ iis_sites }}"
-          notify: restart iis service
+  - name: Create IIS site
+      win_iis_website:
+      name: "{{ item.name }}"
+      state: started
+      port: "{{ item.port }}"
+      physical_path: "{{ item.path }}"
+      with_items: "{{ iis_sites }}"
+      notify: restart iis service
 ```
 <!-- {% endraw %} -->
 
@@ -164,14 +164,12 @@ for creating your template. Enter the following details:
 
 <!-- {% raw %} -->
 ```html
-    <html>
-    <body>
-
-      <p align=center><img src='http://docs.ansible.com/images/logo.png' align=center>
-      <h1 align=center>{{ ansible_hostname }} --- {{ iis_test_message }}
-
-    </body>
-    </html>
+<html>
+<body>
+<p align=center><img src='http://docs.ansible.com/images/logo.png' align=center>
+<h1 align=center>{{ ansible_hostname }} --- {{ iis_test_message }}
+</body>
+   </html>
 ```
 <!-- {% endraw %} -->
 
