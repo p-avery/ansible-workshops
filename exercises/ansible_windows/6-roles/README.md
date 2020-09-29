@@ -83,12 +83,12 @@ Update site.yml to look like to only call your role. It should look like
 below:
 
 ```yaml
-    ---
-    - hosts: windows
-      name: This is my role-based playbook
+---
+- hosts: windows
+  name: This is my role-based playbook
 
-      roles:
-        - iis_simple
+  roles:
+  - iis_simple
 ```
 
 ![New site.yml](images/6-new-site.png)
@@ -100,15 +100,15 @@ Add a default variable to your role. Edit the
 `roles\iis_simple\defaults\main.yml` as follows:
 
 ```yaml
-    ---
-    # defaults file for iis_simple
-    iis_sites:
-      - name: 'Ansible Playbook Test'
-        port: '8080'
-        path: 'C:\sites\playbooktest'
-      - name: 'Ansible Playbook Test 2'
-        port: '8081'
-        path: 'C:\sites\playbooktest2'
+---
+# defaults file for iis_simple
+iis_sites:
+  - name: 'Ansible Playbook Test'
+    port: '8080'
+    path: 'C:\sites\playbooktest'
+  - name: 'Ansible Playbook Test 2'
+    port: '8081'
+    path: 'C:\sites\playbooktest2'
 ```
 
 Step 4:
@@ -118,9 +118,9 @@ Add some role-specific variables to your role in
 `roles\iis_simple\vars\main.yml`.
 
 ```yaml
-    ---
-    # vars file for iis_simple
-    iis_test_message: "Hello World!  My test IIS Server"
+---
+# vars file for iis_simple
+iis_test_message: "Hello World!  My test IIS Server"
 ```
 
 > **Note**
@@ -158,13 +158,13 @@ Step 5:
 Create your role handler in `roles\iis_simple\handlers\main.yml`.
 
 ```yaml
-    ---
-    # handlers file for iis_simple
-    - name: restart iis service
-      win_service:
-        name: W3Svc
-        state: restarted
-        start_mode: auto
+---
+# handlers file for iis_simple
+- name: restart iis service
+  win_service:
+    name: W3Svc
+    state: restarted
+    start_mode: auto
 ```
 
 Step 6:
@@ -174,52 +174,53 @@ Add tasks to your role in `roles\iis_simple\tasks\main.yml`.
 
 <!-- {% raw %} -->
 ```yaml
-    ---
-    # tasks file for iis_simple
+---
+# tasks file for iis_simple
 
-    - name: Install IIS
-      win_feature:
-        name: Web-Server
-        state: present
+- name: Install IIS
+  win_feature:
+    name: Web-Server
+    state: present
 
-    - name: Create site directory structure
-      win_file:
-        path: "{{ item.path }}"
-        state: directory
-      with_items: "{{ iis_sites }}"
+- name: Create site directory structure
+  win_file:
+    path: "{{ item.path }}"
+    state: directory
+    with_items: "{{ iis_sites }}"
 
-    - name: Create IIS site
-      win_iis_website:
-        name: "{{ item.name }}"
-        state: started
-        port: "{{ item.port }}"
-        physical_path: "{{ item.path }}"
-      with_items: "{{ iis_sites }}"
-      notify: restart iis service
+- name: Create IIS site
+  win_iis_website:
+    name: "{{ item.name }}"
+    state: started
+    port: "{{ item.port }}"
+    physical_path: "{{ item.path }}"
+    with_items: "{{ iis_sites }}"
+    notify: restart iis service
 
-    - name: Open port for site on the firewall
-      win_firewall_rule:
-        name: "iisport{{ item.port }}"
-        enable: yes
-        state: present
-        localport: "{{ item.port }}"
-        action: Allow
-        direction: In
-        protocol: Tcp
-      with_items: "{{ iis_sites }}"
+- name: Open port for site on the firewall
+  win_firewall_rule:
+    name: "iisport{{ item.port }}"
+    enable: yes
+    state: present
+    localport: "{{ item.port }}"
+    action: Allow
+    direction: In
+    protocol: Tcp
+    with_items: "{{ iis_sites }}"
 
-    - name: Template simple web site to iis_site_path as index.html
-      win_template:
-        src: 'index.html.j2'
-        dest: '{{ item.path }}\index.html'
-      with_items: "{{ iis_sites }}"
+- name: Template simple web site to iis_site_path as index.html
+  win_template:
+    src: 'index.html.j2'
+    dest: '{{ item.path }}\index.html'
+    with_items: "{{ iis_sites }}"
 
-    - name: Show website addresses
-      debug:
-        msg: "{{ item }}"
-      loop:
-        - http://{{ ansible_host }}:8080
-        - http://{{ ansible_host }}:8081
+- name: Show website addresses
+  debug:
+    msg: "{{ item }}"
+    loop:
+    - http://{{ ansible_host }}:8080
+    - http://{{ ansible_host }}:8081
+
 ```
 <!-- {% endraw %} -->
 
@@ -233,14 +234,12 @@ Right-click `roles\iis_simple\templates` and create a new file called
 
 <!-- {% raw %} -->
 ```html
-    <html>
-    <body>
-
-      <p align=center><img src='http://docs.ansible.com/images/logo.png' align=center>
-      <h1 align=center>{{ ansible_hostname }} --- {{ iis_test_message }}
-
-    </body>
-    </html>
+<html>
+<body>
+  <p align=center><img src='http://docs.ansible.com/images/logo.png' align=center>
+  <h1 align=center>{{ ansible_hostname }} --- {{ iis_test_message }}
+</body>
+</html>
 ```
 <!-- {% endraw %} -->
 
