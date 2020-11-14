@@ -104,3 +104,8 @@ Naviagate back to the job view in the Tower UI and you can see it launch with th
 
 ![job_launch_summary](images/job_launch_summary.png)
 
+End Result
+----------
+We have now seen how we can browse and use the API of Tower this gives us an overview of what we information we need to be able to use with other tools sets
+
+We will now go over how to use this data to get turn what we can find here to use in a external call.
