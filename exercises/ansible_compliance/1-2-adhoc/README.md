@@ -12,9 +12,11 @@ Step 1:
 
 To start, we will need to go to our Inventory. 
 click **Inventories** on the left panel
+
 ![Inventory Menu](images/2-adhoc-inventory_menu.png)
 
 and then click the name of our Inventory **Workshop Inventory**. 
+
 ![Workshop Inventory](images/2-adhoc-Workshop-Inventory.png)
 
 Now that you are on the Inventory Details page, we
