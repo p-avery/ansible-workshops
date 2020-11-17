@@ -53,11 +53,11 @@ Complete the form using the following entries:
 
 | Key          | Value           |                                          |
 |--------------|-----------------|------------------------------------------|
-| Name         | Student Account |                                          |
-| Organization | Default         |                                          |
-| Type         | Machine         |                                          |
-| Username     | student#        | **Replace # with your student number**   |
-| Password     | *****           | Replace with your student password       |
+| Name         | Student Account|                                          |
+| Organization | Default|                                          |
+| Type         | Machine|                                          |
+| Username     | student#| **Replace # with your student number**   |
+| Password     | *****| Replace with your student password       |
 
 ![Add Machine Credential](images/1-tower-add-machine-credential.png)
 
@@ -93,11 +93,11 @@ Fill out the fields as such
 
 | Key            | Value                                                                   |                                                   |
 |----------------|-------------------------------------------------------------------------|---------------------------------------------------|
-| Name           | Workshop Project                                                |                                                   |
+| Name           | Workshop Project|                                                   |
 | Description    |                                   |                                                   |
 | Organization   | Default                                                                 |                                                   |
 | SCM Type       | Git                                                                     |                                                   |
-| SCM URL        | https://github.com/p-avery/ansible_compliance.git|                          |
+| SCM URL        |https://github.com/p-avery/ansible_compliance.git|                          |
 | SCM BRANCH     |                                                                         | Intentionally blank                               |
 | SCM CREDENTIAL |                                                       |                                                   |
 

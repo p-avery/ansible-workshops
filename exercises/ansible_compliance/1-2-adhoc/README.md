@@ -10,9 +10,17 @@ quickly, to many remote nodes.
 Step 1:
 -------
 
-To start, we will need to go to our Inventory. So click **Inventories**
-on the left panel, and then click the name of our Inventory **Workshop Inventory**. Now that you are on the Inventory Details page, we
-will need to go select our Host. So click **HOSTS**.
+To start, we will need to go to our Inventory. 
+click **Inventories** on the left panel
+![Inventory Menu](images/2-adhoc-inventory_menu.png)
+
+and then click the name of our Inventory **Workshop Inventory**. 
+![Workshop Inventory](images/2-adhoc-Workshop-Inventory.png)
+
+Now that you are on the Inventory Details page, we
+want to run ad-hoc commands on a single or multiple host so select the **HOSTS** tab.
+
+![Hosts Tab](images/2-adhoc-hosts-tab.png)
 
 Next to each host is a checkbox. Check the box next to both of the nodes ( node1, node2 and node3). You will then see the **RUN COMMANDS**
 button become enabled. Click it now.
@@ -104,7 +112,7 @@ Fill out this form as follows
 | Key                | Value           | Note                                                            |
 |--------------------|-----------------|-----------------------------------------------------------------|
 | Module             | `service`      |                                                                 |
-| Arguments          | `name=httpd state=started enabled=true`                |      |
+| Arguments          | `name=httpd state=started`                |      |
 | Limit              |                 | This will be pre-filled out for you with the hosts you selected |
 | MACHINE CREDENTIAL | Student Account |                                                                 |
 | ENABLE PRIVILEGE ESACALATION | TICKED                                                                |
@@ -182,6 +190,18 @@ You will then see results like this
 ![Setup Log Details](images/2-adhoc-run-setup-output.png)
 
 (**Note:** If you click the three dots shown on line 23 in the above output, you will see all the facts returned by the `setup` module.)
+
+Modify the list of Ad-Hoc Modules available
+-------------------
+If you want to add or remove modules in the Ad-Hoc List simply go to Settings
+![settings](images/2-adhoc-settings.png)
+
+Then select Jobs
+![Jobs](images/2-adhoc-jobs.png)
+
+Here you can delete by clicking on the ***x*** or type in a new module name into the list.
+
+![Adhoc Modules](images/2-adhoc-modules.png)
 
 End Result
 ----------

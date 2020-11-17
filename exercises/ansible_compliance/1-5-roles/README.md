@@ -1,169 +1,128 @@
-Although it is possible to have all of our tasks inside a single playbook as we saw from the previous exercise. As we progress on our automation journey and branch out across the different enterprise teams, we will start to see a our playbooks will become very large, which increases the complexity and troubleshooting and a lack of multiple collaborates working at the same time.
+Although it is possible to have all of our tasks inside a single playbook as we saw from the previous exercise. As we progress on our automation journey and branch out across the different enterprise teams, we will start to see a our playbooks will become very large, not only does this increase the complexity to make troubleshooting harder but it also inhibits the ability to have collaboration on the Ansible playbook by multiple users /teams at the same time.
 
 Ansible Roles allow us to split up a playbook into many files to make it easier to create and debug but also easier for others to reuse your work. 
 
 We are going to review and include a role.
 
-To run a Security scan on our machines we require 2GB of ram, however our machines have less that 1GB to fix this we can install swap memory, I wouldnt want to have to write a playbook to create and install swap memory for all my linux distributions instead we can have a role created that can then work on our entire footpring ( RHEL, Debian, Ubuntu, SUSE) etc etc, we may have subject matter experts for each distro and they all use different commands to complete the goal and a Role is ideal for this.
+To run a Security scan on our machines we require 2GB of ram, However; Our lab machines have less that 1GB to fix this we can setup swap memory. 
 
-Section 1: Review the role directory structure
+Lets say we have more than 1 distro in our enterprise ( RHEL, SUSE, Ubuntu etc) I wouldnt want to have to create multiple playbooks to setup swap for each distro same as I wouldnt want to have to have a single playbook files with a load of when conditions, as I potentially have different SMEs that would write based on the OS / Application.
+
+Ansible Galaxy has a trove of pre written playbooks and roles and rather than re-invent the wheel, I have decided to include one from Galaxy for this. 
+
+Section 1: Review the swap role
 =======================================================
 
 Step 1:
 -------
 
-In Visual Studio Code, navigate to explorer and your **workshop_project** folder there is a sub directory called **roles** and you will see a role directory called **tomcat-ansible-role**
+The Swap role we are going to use can be found here on Galaxy
+https://galaxy.ansible.com/geerlingguy/swap
 
-![tomcat role](images/tomcat_role.png)
+The role documentation shows that it will work on various versions of Debian, EL and Ubuntu which can be round under the OS Platforms.
+
+We can also see the version history to see that it is still being maintained.
+
+We also see a content score which is based on Ansible testing as well as community feedback.
+
+Finally at the top right we can see a current build status that Travis CI reports on when updated.
+
+
+![galaxy role](images/galaxy_role.png)
 
 Step 2:
 -------
 
-We can see how a role has structure associated with it and is self contained.
+At the top right of the Galaxy role there is a link to the repo which will take us straight to the source code.
 
-default -> Default variables
-handlers: -> the handle tasks we notify
-meta -> information about the role used by Galaxy and Molecule
-molecule -> Testing Framework
-tasks -> The tasks associalted
-templates -> Jinja2 Template files 
-tests -> testing spec files for the role
-vars -> Variables for the role
+![galaxy repo](images/galaxy-repo.png)
+
+or click on this link
+https://github.com/geerlingguy/ansible-role-swap
+
 
 Step 3:
 ---
 
-Ansible will read a default main.yml for the tasks and handlers, if we go into the tasks/main.yml file we can see we can split this up even more to make it more managable.
+When calling a role Ansible first executes the main.yml file in the tasks directory.
 
-![tomcat role main](images/tomcat_role_task_main.png)
+Within the tasks directory we can see 3 playbooks ( main, enable and disable )
 
-By using the Ansible when conditions we can state when you include the other playbooks.
+The main.yml shows us the logic with 3 simple tasks.
 
-If we state tomcat should be present then the install and configure playbooks will run, but if its set as absent then only the uninstall playbook will run.
+```
+---
+- name: Manage swap file entry in fstab.
+  mount:
+    name: none
+    src: "{{ swap_file_path }}"
+    fstype: swap
+    opts: sw
+    state: "{{ swap_file_state }}"
+
+- include_tasks: disable.yml
+  when: swap_file_state == 'absent'
+
+- include_tasks: enable.yml
+  when: swap_file_state == 'present'
+```
+First to ensure the mount point either exists or does not exist in the fstab file.
+
+Next the include_tasks module is used to read in another playbook depending on the condition.
+
+We can now see how we can break down the playbooks into bite size code than ending up with a large playbook based on conditions.
 
 Step 4:
 ---
-Looking at the cofigure.yml file we can see that a condition is set based on if the desired state is for production or not and that we have actually installed.
+Going back to the root of the repo we should look at the defaults folder, and again the main.yml will be read automatically, this variable file is the bottom of the hieracy and should be used for documentation purposes of any variable used within your role. 
 
-![tomcat permissions](images/tomcat_role_permissions.png)
+We can see the following variables can be used with this role.
 
-How else could we make a decision where we would need to set a variable flag?
+```
+---
+swap_file_path: /swapfile
+swap_file_size_mb: '512'
+swap_swappiness: '60'
+swap_file_state: present
+swap_file_create_command: "dd if=/dev/zero of={{ swap_file_path }} bs=1M count={{ swap_file_size_mb }}"
+
+swap_test_mode: false
+```
+
+We can override any of these variabled using the vars ( group and host variables )
+The highest level of order is set on extra vars of which resides in the Tower Job Template form.
 
 Step 5:
 ---
-The defaults/main.yml file will show all the variables we can use with the role and the default answer if we dont specify it else where.
 
-![Tomcat Default Vars](images/tomcat_default_vars.png)
+To use a role from galaxy we need to tell Tower to use it, this can be done with a requirements.yml file this needs to reside in the roles folder on your SCM.
 
-We have various options here like the version of Java to install and the ability to not install java if using another role for this, the tomcat default user and group.
+I have this swap added in for us by simply adding this into my requirements.yml file.
 
-The production permissions is set to false by default but we can use this in our group vars to ensure our production boxes would get that.
+```
+---
+- src: geerlingguy.swap
+```
 
 Step 6:
 ---
 
-We need to create a playbook to be able to use this role, there is a README.md file in the root of the role that gives us much more information on the role variables but also shows us an example playbook.
+We can also see from the swap role documentation to simply use this role on its own, we would need to create a playbook like so.
 
-Example Playbook
-----------------
-```yaml
-- hosts: servers
-  become: true
+```
+- hosts: all
+
   vars:
-    tomcat_version: 8.5.23
-    
-    tomcat_permissions_production: True
-    
-    tomcat_users:
-      - username: "tomcat"
-        password: "t3mpp@ssw0rd"
-        roles: "tomcat,admin,manager,manager-gui"
-      - username: "exampleuser"
-        password: "us3rp@ssw0rd"
-        roles: "tomcat"        
-  roles:
-    - role: tomcat-ansible-role
-```
-All of these variables would be lifecycle controlled. 
-
-*tomcat_version* this would be controlled as we test and promote.
-
-*tomcat_permissions_production* this would is set to false by default but we would want this to be true for production boxes.
-
-*tomcat_users* this is going to be different per lifecycle
-
-Lets create a playbook by right clicking on the **workshop_project** directory and select new file, and call it install_tomcat.yml
-
-Lets populate it with the following
-
-```yaml
----
-- name: Install Apache Tomcat
-  hosts: dev,qa,prod
-  
-  roles:
-    - role: tomcat-ansible-role
-```
-Lets also create the uninstall playbook at the same time right click and add a new file called uninstall_tomcat.yml and add in the following
-
-```yaml
----
-- name: Uninstall Apache Tomcat
-  hosts: dev,qa,prod
-  vars:
-    tomcat_state: absent
+    swap_file_size_mb: '1024'
 
   roles:
-    - role: tomcat-ansible-role
+    - geerlingguy.swap
 ```
 
-Step 7:
----
-
-Navigate back to our **inventory/group_vars** and create a file called prod and add the following lines
-
-```yaml
-tomcat_version: 8.5.23
-tomcat_permissions_production: True
-tomcat_users:
-  - username: "tomcat"
-    password: "T0mC4t321!"
-    roles: "tomcat,admin,manager,manager-gui"
-  - username: "produser"
-    password: "PRuserP4$$"
-    roles: "tomcat"     
-```
-Edit the qa group_vars file and add in the following
-```yaml
-tomcat_version: 8.5.23
-tomcat_users:
-  - username: "tomcat"
-    password: "TCP@$$w0rd"
-    roles: "tomcat,admin,manager,manager-gui"
-  - username: "qauser"
-    password: "QAuserP4$$"
-    roles: "tomcat"
-```
-finally create a dev file and add the following
-```yaml
-tomcat_version: 8.5.23
-tomcat_users:
-  - username: "tomcat"
-    password: "TCP@$$w0rd"
-    roles: "tomcat,admin,manager,manager-gui"
-  - username: "devuser"
-    password: "DEVuserP4$$"
-    roles: "tomcat"
-```
-
-![tomcat prod group](images/tomcat_prod_group.png)
-
-Step 8:
----
-commit the files and push to git.
+Note how tasks has been changed to roles.
 
 
-Create Job Templates for Tomcat install and uninstall in Tower.
+Create Job Templates for Swap memory in Tower.
 ===
 
 Step 1:
@@ -196,58 +155,44 @@ Complete the form using the following values
 
 | Key         |Value                                   | Prompt on Launch |
 |-------------|----------------------------------------|------------------|
-| Name        | Install Apache Tomcat            |                  |
-| Description | Template for the apache tomcat install|                  |
-| JOB TYPE    | Run                                    |                  |
-| INVENTORY   | Student Inventory                      |                  |
-| PROJECT     | Ansible Workshop Project               |                  |
-| PLAYBOOK    | `install_tomcat.yml`                   |                  |
-| CREDENTIAL  | Student Account                        |                  |
+| Name        |swap-setup|                  |
+| Description |Template for configuring swap memory|                  |
+| JOB TYPE    |Run                                    |                  |
+| INVENTORY   |Workshop Inventory                      |                  |
+| PROJECT     |Workshop Project               |                  |
+| PLAYBOOK    |`playbooks/swap_setup.yml`                   |                  |
+| CREDENTIAL  |Student Account                        |                  |
 | LIMIT       |                                        | Checked          |
-| OPTIONS     | [*] ENABLE PRIVILEGE ESCALATION        |                  |
-
+| OPTIONS     |         |                  |
+| EXTRA VARIABLES|---<br>swap_file_mb: '2048'<br>swap_file_state: present| Checked
 Step 4:
 -------
 
 Click SAVE ![Save](images/at_save.png) 
 
-Step 5:
--------
-
-Lets create another for the uninstall
-
-Click the ![Add](images/add.png) icon, and select Job Template
-
-Step 6:
--------
-
-Complete the form using the following values
-
-| Key         |Value                                   | Prompt on Launch |
-|-------------|----------------------------------------|------------------|
-| Name        | Uninstall Apache Tomcat            |                  |
-| Description | Template for the apache tomcat uninstall |                  |
-| JOB TYPE    | Run                                    |                  |
-| INVENTORY   | Student Inventory                      |                  |
-| PROJECT     | Ansible Workshop Project               |                  |
-| PLAYBOOK    | `uninstall_tomcat.yml`                   |                  |
-| CREDENTIAL  | Student Account                        |                  |
-| LIMIT       |                                        | Checked          |
-| OPTIONS     | [*] ENABLE PRIVILEGE ESCALATION        |                  |
-
-Step 7:
--------
-
-Click SAVE ![Save](images/at_save.png) 
-
-Running a Job Template
+Run The Job Template
 ======================
 
-Now that you’ve successfully created your Job Template, you are ready to
-launch it. Once you do, you will be redirected to a job screen which is
-refreshing in real time showing you the status of the job.
-
 Step 1:
--------
+---
+When you launch the job template it will prompt you the limit
+![Swap-Setup-Prompt](images/swap-setup-prompt.png)
 
-Select TEMPLATES
+Change limit to node1
+
+and click next
+
+and then click launch
+
+You will now see this setup a 2GB swap file on node1 with the full output
+
+Step 2:
+---
+Lets go back and relaunch the Template but this time remove it by changing the swap_file_state to ***absent***
+
+![remove swap](images/swap-remove-prompt.png)
+
+End Result
+==========
+
+We can now see how roles can make code easier to manage allow multiple people to work on the same project by delegating individal yaml files for tasks, and we saw the ease of reuse by overriding with the variables.
