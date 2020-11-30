@@ -4,7 +4,7 @@ The Red Hat Ansible Automation Workshops project is intended for effectively dem
 
 # Website
 
- - [http://ansible.github.io/workshops](http://ansible.github.io/workshops) - Check out the optional website which is rendered automatically from markdown files using [Github Pages](https://pages.github.com/).  If you are already on the website please ignore this section.
+ - [http://p-avery.github.io/ansible-workshops](http://p-avery.github.io/ansible-workshops) - Check out the optional website which is rendered automatically from markdown files using [Github Pages](https://pages.github.com/).  If you are already on the website please ignore this section.
 
 
 # Instructor-led Workshops
@@ -15,6 +15,7 @@ The Red Hat Ansible Automation Workshops project is intended for effectively dem
 | **Ansible Network Automation Workshop** <br> focused on router and switch platforms like Arista, Cisco, Juniper   | [Deck](./decks/ansible_network.pdf) | [Exercises](./exercises/ansible_network)  | `workshop_type: networking`  |
 | **Ansible F5 Workshop** <br> focused on automation of F5 BIG-IP  | [Deck](./decks/ansible_f5.pdf) | [Exercises](./exercises/ansible_f5)   | `workshop_type: f5` |
 | **Ansible Security Automation** <br> focused on automation of security tools like Check Point Firewall, IBM QRadar and the IDS Snort  | [Deck](./decks/ansible_security.pdf) | [Exercises](./exercises/ansible_security)   | `workshop_type: security` |
+| **Ansible Security Compliance Workshop** <br> focused on automation of Security Compliance  | [Deck](./decks/ansible_compliance.pdf) | [Exercises](./exercises/ansible_compliance)   | `workshop_type: compliance` |
 | **Ansible Windows Automation Workshop** <br> focused on automation of Microsoft Windows  | [Deck](./decks/ansible_windows.pdf) | [Exercises](./exercises/ansible_windows)   | `workshop_type: windows` |
 
 ## Lab Provisioner
