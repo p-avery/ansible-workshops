@@ -26,7 +26,7 @@ If your experience is different in schedulung these workshops, please let us kno
 - [Exercise 1-1 - Intro and configuration of Ansible Tower](1-1-tower)
 - [Exercise 1-2 - Tower Ad-hoc commands](1-2-adhoc)
 - [Exercise 1-3 - Intro to playbooks](1-3-playbook)
-- [Exercise 1-4 - Ansible Tower Job Templates](1-4-job-templates)
+- [Exercise 1-4 - Ansible Tower Job Templates](1-4-job-template)
 - [Exercise 1-5 - Ansible Roles](1-5-roles)
 - [Exercise 1-6 - OpenScap](1-6-openscap-job-template)
 - [Exercise 1-7 - Ansible Tower Surveys](1-7-surveys)
