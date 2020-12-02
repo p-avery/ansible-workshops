@@ -164,7 +164,7 @@ Complete the form using the following values
 | CREDENTIAL  |Student Account                        |                  |
 | LIMIT       |                                        | Checked          |
 | OPTIONS     |         |                  |
-| EXTRA VARIABLES|---<br>swap_file_mb: 2048<br>swap_file_state: present| Checked          |
+| EXTRA VARIABLES|swap_file_mb: 2048<br>swap_file_state: present| Checked          |
 
 Step 4:
 -------
